@@ -1,71 +1,60 @@
-# git
+# first
 
-`D:\git` 目录已初始化为 Git 仓库（默认分支 `main`）。
+`D:\git` 目录的 Git 仓库（默认分支 `main`）。
 
-## 现状
+## 远程
+
+| 名称 | 地址 | 状态 |
+|---|---|---|
+| github | https://github.com/liucencan/first.git | 已推送 |
+| gitee | https://gitee.com/GITEE_USER/first.git | 待配置账号 |
 
 - 本地仓库：`D:\git\.git`
-- 分支：`main`
-- 远程：`github`、`gitee`（当前为占位地址 `USERNAME/REPO`）
 - 一键脚本：`push.ps1`
 
-## 首次推送（三步）
+## 当前状态
 
-### 1. 把公钥加到两个平台
+GitHub 已通过 HTTPS + Git Credential Manager 完成首次推送，`main` 已建立跟踪。
 
-已生成密钥：`C:\Users\qwertyuiop\.ssh\id_ed25519`
+Gitee 侧缺少两样东西：
 
-公钥全文：
+1. `liucencan` 在 Gitee 上不存在（`https://gitee.com/liucencan` 返回 404），需要确认 Gitee 用户名；
+2. 本机没有 Gitee 的凭据。
+
+## Gitee 推送（二选一）
+
+### 方式 A：SSH
+
+把公钥加到 Gitee（设置 → SSH 公钥）：
 
 ```
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmWG93yiSdNOnSyLp4YYiRu6fqSOXRJMEns6N+NJbqH qwertyuiop-dsh
 ```
 
-- GitHub → Settings → SSH and GPG keys → New SSH key
-- Gitee → 设置 → SSH 公钥 → 添加公钥
-
-验证：
-
-```powershell
-ssh -T git@github.com
-ssh -T git@gitee.com
-```
-
-### 2. 在两个平台各建一个**空**仓库（不要勾选 README / .gitignore / License）
-
-名字与 `-Repo` 参数保持一致。
-
-### 3. 一键推送
+然后：
 
 ```powershell
 cd D:\git
-pwsh -File .\push.ps1 -User 你的GitHub用户名 -Repo 仓库名
+git remote set-url gitee git@gitee.com:GITEE_USER/first.git
+ssh -T git@gitee.com
+git push -u gitee main
 ```
 
-两个平台用户名不同时：
+### 方式 B：HTTPS + 私人令牌
+
+Gitee → 设置 → 私人令牌 → 生成新令牌（勾选 `projects` 权限）。
 
 ```powershell
-pwsh -File .\push.ps1 -User github用户名 -Repo 仓库名 -GiteeUser gitee用户名
+cd D:\git
+git remote set-url gitee https://gitee.com/GITEE_USER/first.git
+git push -u gitee main
+# 提示输入用户名时填 GITEE_USER，密码处粘贴令牌
 ```
 
-想走 HTTPS（用 Git Credential Manager 浏览器登录，免配 SSH）：
+也可写入凭据管理器，避免重复输入：
 
 ```powershell
-pwsh -File .\push.ps1 -User 用户名 -Repo 仓库名 -Https
-```
-
-## 直接用 API 建仓库（可选）
-
-```powershell
-# GitHub
-curl -X POST https://api.github.com/user/repos `
-  -H "Authorization: Bearer GITHUB_TOKEN" `
-  -H "Accept: application/vnd.github+json" `
-  -d '{\"name\":\"REPO\",\"private\":false}'
-
-# Gitee
-curl -X POST "https://gitee.com/api/v5/user/repos" `
-  -d "access_token=GITEE_TOKEN&name=REPO&private=false"
+"protocol=https`nhost=gitee.com`nusername=GITEE_USER`npassword=GITEE_TOKEN`n" | git credential approve
 ```
 
 ## 日常命令
@@ -75,12 +64,6 @@ git add -A
 git commit -m "message"
 git push github main
 git push gitee main
-```
-
-一次推两边：
-
-```powershell
-git push github main; git push gitee main
 ```
 
 ## 已忽略内容
